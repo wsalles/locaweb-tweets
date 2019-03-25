@@ -12,30 +12,29 @@ def _not_reply_to_user_locaweb(id_reply_to_user):
 def _total_tweets(tweets):
     return len(tweets['statuses'])
 
-
 class Tweets:
     def __init__(self):
-        #self.tweets = json.loads(self.capture().text)
         self.tweets = {}
         self.__filter_tweets = []
         self.most_relevants = []
         self.most_mentions = {}
-        self.orderBy = self.order_by()
+        self.orderBy = []
 
     @property
     def filter_tweets(self):
         self.__filter_tweets = self.filters()
         return self.__filter_tweets
 
-    def capture(self):
+    def request_api(self):
         url = 'http://tweeps.locaweb.com.br/tweeps'
         headers = {'username': 'wallace_robinson@hotmail.com'}
 
         response = requests.request('GET', url=url, headers=headers)
 
-        self.tweets = json.loads(response.text)
-
         return response
+
+    def capture(self):
+        return json.loads(self.request_api().text)
 
     def filters(self, tweets):
         if tweets:
@@ -48,48 +47,48 @@ class Tweets:
                     if _id_user_locaweb(id_user_mentions) and _not_reply_to_user_locaweb(id_reply_to_user):
                         self.__filter_tweets.append(tweets['statuses'][x])
                 except IndexError:
-                    print(f'user_mentions.0.id not found in array {x}')
+                    pass #print(f'user_mentions.0.id not found in array {x}')
             return self.__filter_tweets
         else:
             return 'No captures were found'
 
-    def order_by(self):
-        self.orderBy = sorted(self.__filter_tweets,
+    def order_by(self, data):
+        self.orderBy = sorted(data,
                          key=lambda x: (x['user']['followers_count'], x['retweet_count'], x['favorite_count']),
                          reverse=True)
         return self.orderBy
 
-    def show_relevants(self):
+    def show_relevants(self, data):
         self.most_relevants = []
-        for x in range(len(self.orderBy)):
+        for pointer in range(len(data)):
             relevants = {
-                "followers_count": self.orderBy[x]['user']['followers_count'],
-                "screen_name": self.orderBy[x]['user']['screen_name'],
-                "profile_link": "https://twitter.com/" + self.orderBy[x]['user']['screen_name'],
-                "created_at": self.orderBy[x]['created_at'],
-                "link": "https://twitter.com/" + self.orderBy[x]['user']['screen_name'] + "/status/" +
-                        self.orderBy[x]['id_str'],
-                "retweet_count": self.orderBy[x]['retweet_count'],
-                "text": self.orderBy[x]['text'],
-                "favorite_count": self.orderBy[x]['favorite_count']
+                "followers_count": data[pointer]['user']['followers_count'],
+                "screen_name": data[pointer]['user']['screen_name'],
+                "profile_link": "https://twitter.com/" + data[pointer]['user']['screen_name'],
+                "created_at": data[pointer]['created_at'],
+                "link": "https://twitter.com/" + data[pointer]['user']['screen_name'] + "/status/" +
+                        data[pointer]['id_str'],
+                "retweet_count": data[pointer]['retweet_count'],
+                "text": data[pointer]['text'],
+                "favorite_count": data[pointer]['favorite_count']
             }
             self.most_relevants.append(relevants)
         return self.most_relevants
 
-    def show_mentions(self):
+    def show_mentions(self, data):
         self.most_mentions = {}
-        for x in range(len(self.orderBy)):
-            self.most_mentions[self.orderBy[x]['user']['screen_name']] = []
+        for pointer in range(len(data)):
+            self.most_mentions[data[pointer]['user']['screen_name']] = []
             mentions = {
-                "screen_name": self.orderBy[x]['user']['screen_name'],
-                "profile_link": "https://twitter.com/" + self.orderBy[x]['user']['screen_name'],
-                "created_at": self.orderBy[x]['created_at'],
-                "favorite_count": self.orderBy[x]['favorite_count'],
-                "followers_count": self.orderBy[x]['user']['followers_count'],
-                "text": self.orderBy[x]['text'],
-                "link": "https://twitter.com/" + self.orderBy[x]['user']['screen_name'] + "/status/" +
-                        self.orderBy[x]['id_str'],
-                "retweet_count": self.orderBy[x]['retweet_count']
+                "screen_name": data[pointer]['user']['screen_name'],
+                "profile_link": "https://twitter.com/" + data[pointer]['user']['screen_name'],
+                "created_at": data[pointer]['created_at'],
+                "favorite_count": data[pointer]['favorite_count'],
+                "followers_count": data[pointer]['user']['followers_count'],
+                "text": data[pointer]['text'],
+                "link": "https://twitter.com/" + data[pointer]['user']['screen_name'] + "/status/" +
+                        data[pointer]['id_str'],
+                "retweet_count": data[pointer]['retweet_count']
             }
-            self.most_mentions[self.orderBy[x]['user']['screen_name']].append(mentions)
+            self.most_mentions[data[pointer]['user']['screen_name']].append(mentions)
         return self.most_mentions

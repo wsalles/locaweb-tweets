@@ -1,4 +1,6 @@
-from flask import Flask
+import json
+
+from flask import Flask, render_template
 from flask_restful import Api, Resource
 
 from src.tweets import Tweets
@@ -8,21 +10,26 @@ api = Api(app)
 
 def refreshData():
     # Chama o método de captura
-    tweets.capture()
+    c = tweets.capture()
     # Chama o método para filtrar os tweets para usuários locaweb
-    tweets.filters()
+    f = tweets.filters(c)
     # Método para Ordenar: 1) Usuários com mais seguidores. 2) Tweets que tenham mais retweets. 3) Tweet com mais likes.
-    tweets.order_by()
+    return tweets.order_by(f)
+
+@app.route('/')
+def index():
+    # Pagina com interface ao usuario
+    return render_template('index.html')
 
 class MostRelevants(Resource):
     def get(self):
-        refreshData()
-        return tweets.show_relevants()
+        r = refreshData()
+        return tweets.show_relevants(r)
 
 class MostMentions(Resource):
     def get(self):
-        refreshData()
-        return tweets.show_mentions()
+        r = refreshData()
+        return tweets.show_mentions(r)
 
 
 if __name__ == '__main__':

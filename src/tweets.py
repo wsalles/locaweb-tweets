@@ -28,7 +28,10 @@ class Tweets:
 
     def request_api(self):
         url = 'http://tweeps.locaweb.com.br/tweeps'
-        HTTP_USERNAME = os.environ['HTTP_USERNAME']
+        try:
+            HTTP_USERNAME = os.environ['HTTP_USERNAME']
+        except KeyError:
+            HTTP_USERNAME = 'wallace_robinson@hotmail.com'
         headers = {'username': HTTP_USERNAME}
 
         response = requests.request('GET', url=url, headers=headers)

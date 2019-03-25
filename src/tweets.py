@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 
@@ -27,7 +28,8 @@ class Tweets:
 
     def request_api(self):
         url = 'http://tweeps.locaweb.com.br/tweeps'
-        headers = {'username': 'wallace_robinson@hotmail.com'}
+        HTTP_USERNAME = os.environ['HTTP_USERNAME']
+        headers = {'username': HTTP_USERNAME}
 
         response = requests.request('GET', url=url, headers=headers)
 

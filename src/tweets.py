@@ -9,38 +9,44 @@ def _not_reply_to_user_locaweb(id_reply_to_user):
     return id_reply_to_user != 42
 
 
+def _total_tweets(tweets):
+    return len(tweets['statuses'])
+
+
 class Tweets:
     def __init__(self):
+        #self.tweets = json.loads(self.capture().text)
         self.tweets = {}
         self.__filter_tweets = []
         self.most_relevants = []
         self.most_mentions = {}
-        self.orderBy = []
+        self.orderBy = self.order_by()
 
     @property
     def filter_tweets(self):
+        self.__filter_tweets = self.filters()
         return self.__filter_tweets
 
     def capture(self):
         url = 'http://tweeps.locaweb.com.br/tweeps'
         headers = {'username': 'wallace_robinson@hotmail.com'}
 
-        response = requests.request('GET', url=url, headers=headers).text
+        response = requests.request('GET', url=url, headers=headers)
 
-        self.tweets = json.loads(response)
+        self.tweets = json.loads(response.text)
 
-        return self.tweets
+        return response
 
-    def filters(self):
-        if self.tweets:
+    def filters(self, tweets):
+        if tweets:
             # Para efeito de testes, considere que o usuário da Locaweb no Twitter tem o ID 42
-            for x in range(len(self.tweets['statuses'])):
+            for x in range(_total_tweets(tweets)):
                 try:
-                    id_user_mentions = self.tweets['statuses'][x]['entities']['user_mentions'][0]['id']
-                    id_reply_to_user = self.tweets['statuses'][x]['in_reply_to_user_id']
+                    id_user_mentions = tweets['statuses'][x]['entities']['user_mentions'][0]['id']
+                    id_reply_to_user = tweets['statuses'][x]['in_reply_to_user_id']
 
                     if _id_user_locaweb(id_user_mentions) and _not_reply_to_user_locaweb(id_reply_to_user):
-                        self.__filter_tweets.append(self.tweets['statuses'][x])
+                        self.__filter_tweets.append(tweets['statuses'][x])
                 except IndexError:
                     print(f'user_mentions.0.id not found in array {x}')
             return self.__filter_tweets
